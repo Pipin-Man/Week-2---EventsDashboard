@@ -24,6 +24,15 @@ Events include:
 
 Run `supabase-schema.sql` in Supabase SQL Editor.
 
+
+### 1b) Load sample data (optional)
+
+Run `supabase-seed.sql` in Supabase SQL Editor after the schema to create two sample projects and a pre-filled event stream.
+
+Sample API keys created by the seed:
+- `ed_sample_store_api_key`
+- `ed_sample_saas_api_key`
+
 ### 2) Install dependencies
 
 ```bash
@@ -92,6 +101,22 @@ Response includes generated `apiKey`.
   "icon": "💳",
   "tags": ["prod", "stripe"]
 }
+```
+
+
+You can post a test event immediately with:
+
+```bash
+curl -X POST http://localhost:4000/api/events \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: ed_sample_store_api_key" \
+  -d '{
+    "channel": "orders",
+    "title": "Order shipped",
+    "description": "Order #1844 shipped via UPS",
+    "icon": "📦",
+    "tags": ["prod", "shipping"]
+  }'
 ```
 
 ## Deployment notes (API)
