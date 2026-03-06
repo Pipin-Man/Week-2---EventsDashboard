@@ -1,0 +1,16 @@
+{
+  "name": "events-dashboard",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "api",
+    "dashboard"
+  ],
+  "scripts": {
+    "install:all": "npm install --workspaces",
+    "dev:api": "npm --workspace api run dev",
+    "dev:dashboard": "npm --workspace dashboard run dev",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces"
+  }
+}
