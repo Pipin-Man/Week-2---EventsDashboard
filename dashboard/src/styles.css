@@ -1,0 +1,97 @@
+:root {
+  font-family: Inter, system-ui, sans-serif;
+  color: #102134;
+  background: #f4f7fb;
+}
+
+body {
+  margin: 0;
+}
+
+.page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+header p {
+  margin-top: 8px;
+  color: #516177;
+}
+
+.controls {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+input,
+select {
+  border: 1px solid #ccd6e4;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.chart-card,
+.feed-card {
+  margin-top: 18px;
+  background: white;
+  border: 1px solid #e0e8f2;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.feed-list {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.feed-item {
+  border: 1px solid #e6edf5;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.meta {
+  margin-top: 6px;
+  color: #62758d;
+  font-size: 13px;
+}
+
+.tags {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tags span {
+  background: #edf1fd;
+  color: #384ebf;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.error {
+  color: #c1244c;
+}
