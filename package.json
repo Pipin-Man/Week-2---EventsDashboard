@@ -1,0 +1,13 @@
+{
+  "name": "event-dashboard",
+  "private": true,
+  "workspaces": [
+    "api",
+    "dashboard"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace api run dev",
+    "dev:dashboard": "npm --workspace dashboard run dev",
+    "build": "npm --workspace api run build && npm --workspace dashboard run build"
+  }
+}
