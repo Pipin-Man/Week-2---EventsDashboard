@@ -22,7 +22,6 @@ services:
   - type: web
     name: event-dashboard-web
     runtime: static
-    plan: free
     rootDir: dashboard
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
