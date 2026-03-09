@@ -20,12 +20,24 @@ create table if not exists public.events (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.insights (
+  id uuid primary key default gen_random_uuid(),
+  project_id uuid not null references public.projects(id) on delete cascade,
+  title text not null,
+  value text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (project_id, title)
+);
+
 create index if not exists events_created_at_idx on public.events (created_at desc);
 create index if not exists events_channel_idx on public.events (channel);
 create index if not exists events_tags_gin_idx on public.events using gin (tags);
+create index if not exists insights_project_title_idx on public.insights (project_id, title);
 
 alter table public.projects enable row level security;
 alter table public.events enable row level security;
+alter table public.insights enable row level security;
 
 -- Dashboard can read events with anon key.
 drop policy if exists "public can read events" on public.events;

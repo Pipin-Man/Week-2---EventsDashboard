@@ -1,27 +1,101 @@
 # Event Dashboard
 
-Production-ready event monitoring app with:
-- **Remote API** (`api/`) for ingestion via API key auth
-- **Local dashboard** (`dashboard/`) with live feed, channel filter, search, and activity chart
-- **Supabase** as always-on cloud database + realtime backend
+[![Deploy to Render](https://img.shields.io/badge/Deploy%20to-Render-46E3B7?logo=render&logoColor=000000)](https://dashboard.render.com/blueprint/new?repo=https://github.com/Pipin-Man/Week-2---EventsDashboard)
 
-## Quick Start (5 minutes)
+A full event monitoring app with:
+- A remote REST API for event ingestion (API key auth)
+- A dashboard UI for live feed, charts, insights, alerts, and API playground
+- Supabase cloud database + realtime updates
 
-If you are brand new, follow only these steps first:
+## 10-Minute Getting Started (First Time)
+If this is your first full-stack project, follow only these steps:
 
-1. In Supabase, run [`sql/supabase.sql`](./sql/supabase.sql) in **SQL Editor**.
-2. In Supabase **Project Settings -> API**, copy:
-- Project URL
-- anon/public key
-- service_role key
-3. Install deps from repo root:
+1. **Create Supabase project + schema**
+   - In Supabase SQL Editor, run [`sql/supabase.sql`](./sql/supabase.sql).
+2. **Push this repo to GitHub**
+   - Render deploy needs your latest code in GitHub.
+3. **Deploy on Render (one click)**
+   - Click the **Deploy to Render** button at the top of this README.
+4. **Set Render environment variables**
+   - API service: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `PROJECT_CREATION_TOKEN`
+   - Web service: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_BASE_URL` (your API URL)
+5. **Open your dashboard URL**
+   - Create a project in the **Projects** tab to generate your first API key.
+6. **Send your first event**
+   - Use Playground page or `POST /api/events` with `x-api-key`.
+
+After this, the app is live and accessible from other devices.
+## What This Project Is
+If you are new to terms like "stack" or "tech", here is the simple version:
+- **Backend/API**: the server part (`api/`) that accepts events from apps.
+- **Frontend/Dashboard**: the website part (`dashboard/`) where you view data.
+- **Database**: where your data is stored (Supabase).
+
+So the app is split into two deployable parts:
+1. **API** (should be online all the time)
+2. **Dashboard** (web app you open in browser from any device)
+
+## Architecture (Simple View)
+```mermaid
+flowchart LR
+    A[Your Apps / Other Projects] -->|POST /api/events + x-api-key| B[Event Dashboard API<br/>Render Web Service]
+    B -->|Insert/Query| C[(Supabase PostgreSQL)]
+    C -->|Realtime events + reads| D[Dashboard Web App<br/>Render Static Site]
+    E[Phone / Laptop / Tablet] -->|Open dashboard URL| D
+```
+## Tech Stack (Beginner-Friendly)
+- **Language**: TypeScript (both API and dashboard)
+- **API server**: Node.js + Express + Zod validation
+- **Dashboard**: React + Vite + React Router
+- **Charts**: Recharts
+- **Database + realtime**: Supabase (PostgreSQL + Realtime)
+- **Hosting**: Render (Blueprint via `render.yaml`)
+
+## Features
+- `POST /api/events` with API key authentication
+- Per-project API key generation, rotation, and revocation
+- Projects page to create/select project
+- Real-time feed (new events appear instantly)
+- Search + channel filters + pagination (25/50/100/all)
+- Shared date range filter across Feed / Charts / Insights
+- Charts page:
+  - Events per day line chart
+  - Channel distribution doughnut chart
+  - Per-channel activity bar charts
+- Insights page with auto-refresh every 15 seconds
+- Exports:
+  - Feed to CSV
+  - Insights snapshot to JSON
+- Alerts page with spike rules (for example, errors spike)
+- API Playground page with live `fetch()` preview and submit
+
+## Project Structure
+
+```text
+api/          # Express API (event ingestion, project/key management, insights)
+dashboard/    # React dashboard
+sql/          # Supabase SQL schema/migrations
+render.yaml   # Render Blueprint (deploy API + dashboard)
+```
+
+## Local Setup (Development)
+
+### 1. Install dependencies
 
 ```powershell
 cd "C:\Users\pipin\Desktop\GitHub\Week-2 - EventDashboard"
 npm.cmd install
 ```
 
-4. Configure API env:
+### 2. Create Supabase schema
+1. Open your Supabase project.
+2. Go to SQL Editor.
+3. Run [`sql/supabase.sql`](./sql/supabase.sql).
+
+If your database existed before insights were added, also run:
+- [`sql/insights-migration.sql`](./sql/insights-migration.sql)
+
+### 3. Configure API env
 
 ```powershell
 cd api
@@ -32,45 +106,16 @@ notepad .env
 Set:
 
 ```env
-SUPABASE_URL=...
-SUPABASE_SERVICE_ROLE_KEY=...
-PROJECT_CREATION_TOKEN=your-secret
+PORT=3000
+SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
+PROJECT_CREATION_TOKEN=choose-a-secret-token
 ```
 
-5. Start API (keep terminal open):
+### 4. Configure dashboard env
 
 ```powershell
-cd ..
-npm.cmd run dev:api
-```
-
-6. In a second terminal, create project and print full API key:
-
-```powershell
-$response = Invoke-RestMethod -Method POST `
-  -Uri "http://localhost:3000/api/projects" `
-  -ContentType "application/json" `
-  -Body (@{ name = "My Project"; creationToken = "your-secret" } | ConvertTo-Json)
-
-$response.apiKey
-```
-
-7. Send one event with that key:
-
-```powershell
-$event = @{ channel = "deploys"; title = "Hello dashboard"; tags = @("test") } | ConvertTo-Json
-
-Invoke-RestMethod -Method POST `
-  -Uri "http://localhost:3000/api/events" `
-  -Headers @{ "x-api-key" = "PASTE_FULL_API_KEY_HERE" } `
-  -ContentType "application/json" `
-  -Body $event
-```
-
-8. Configure dashboard env and run it:
-
-```powershell
-cd dashboard
+cd ..\dashboard
 Copy-Item .env.example .env -Force
 notepad .env
 ```
@@ -78,231 +123,196 @@ notepad .env
 Set:
 
 ```env
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_ANON_KEY=...
+VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+VITE_API_BASE_URL=http://localhost:3000
 ```
 
-Run:
+### 5. Run API + dashboard
+Use two terminals:
 
 ```powershell
-cd ..
-npm.cmd run dev:dashboard
-```
-
-Open [http://localhost:5173](http://localhost:5173).
-
-## Architecture
-
-1. Your apps send events to `POST /api/events` with `x-api-key`.
-2. API stores events in Supabase.
-3. Dashboard reads from Supabase and subscribes to realtime inserts.
-
-## Prerequisites
-
-- Node.js 20+
-- npm
-- Supabase project
-
-## 1) Create Supabase schema
-
-1. Create a Supabase project.
-2. Open **SQL Editor** and run [`sql/supabase.sql`](./sql/supabase.sql).
-3. Go to **Project Settings -> API** and copy:
-- **Project URL** -> `SUPABASE_URL` / `VITE_SUPABASE_URL`
-- **service_role key** -> `SUPABASE_SERVICE_ROLE_KEY` (API only)
-- **anon/public key** -> `VITE_SUPABASE_ANON_KEY` (dashboard only)
-
-## 2) Install dependencies
-
-From repo root:
-
-```powershell
-cd "C:\Users\pipin\Desktop\GitHub\Week-2 - EventDashboard"
-npm.cmd install
-```
-
-## 3) Configure API
-
-```powershell
-cd "C:\Users\pipin\Desktop\GitHub\Week-2 - EventDashboard\api"
-Copy-Item .env.example .env -Force
-notepad .env
-```
-
-Set `.env`:
-
-```env
-PORT=3000
-SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
-PROJECT_CREATION_TOKEN=your-random-secret-token
-```
-
-Run API:
-
-```powershell
-cd "C:\Users\pipin\Desktop\GitHub\Week-2 - EventDashboard"
+# Terminal 1 (repo root)
 npm.cmd run dev:api
 ```
 
-Expected log:
-
-```text
-API listening on port 3000
+```powershell
+# Terminal 2 (repo root)
+npm.cmd run dev:dashboard
 ```
 
-## 4) Create project + API key (PowerShell-safe)
+Open: `http://localhost:5173`
 
-Open a **second** terminal (keep API terminal running):
+## Quick Test (Create project and send event)
+
+### Create project + get full API key
 
 ```powershell
 $response = Invoke-RestMethod -Method POST `
   -Uri "http://localhost:3000/api/projects" `
   -ContentType "application/json" `
-  -Body (@{ name = "My Project"; creationToken = "your-random-secret-token" } | ConvertTo-Json)
+  -Body (@{ name = "My Project"; creationToken = "choose-a-secret-token" } | ConvertTo-Json)
 
 $response.apiKey
 ```
 
-Notes:
-- PowerShell may show truncated values like `edk_123...` in table view.
-- Use `$response.apiKey` or `$response | ConvertTo-Json -Depth 5` to get the full key.
-
-## 5) Send a test event (PowerShell-safe)
+### Send event
 
 ```powershell
 $event = @{
   channel = "deploys"
   title = "First event"
-  description = "test event"
-  emoji = "??"
+  description = "hello dashboard"
+  emoji = ":rocket:"
   tags = @("test")
 } | ConvertTo-Json
 
 Invoke-RestMethod -Method POST `
   -Uri "http://localhost:3000/api/events" `
-  -Headers @{ "x-api-key" = "YOUR_FULL_API_KEY" } `
+  -Headers @{ "x-api-key" = "PASTE_FULL_API_KEY" } `
   -ContentType "application/json" `
   -Body $event
 ```
 
-You should receive a response containing the inserted event.
-
-## 6) Configure and run dashboard (local)
-
-```powershell
-cd "C:\Users\pipin\Desktop\GitHub\Week-2 - EventDashboard\dashboard"
-Copy-Item .env.example .env -Force
-notepad .env
-```
-
-Set `.env`:
-
-```env
-VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
-VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-```
-
-Run dashboard:
+## Sample Data Import
+You can import demo data JSON files (for example `ecommerce-demo.json`).
 
 ```powershell
-cd "C:\Users\pipin\Desktop\GitHub\Week-2 - EventDashboard"
-npm.cmd run dev:dashboard
+# from repo root
+npm.cmd --workspace api run import:sample -- .\ecommerce-demo.json
 ```
 
-Open `http://localhost:5173`.
+The script creates a project, inserts events with realistic timestamps, upserts insights, and prints the generated API key.
 
-## Deploy API to Render (always-on)
+## Full Deployment Walkthrough (Web + Other Devices)
 
-A Render Blueprint is included at [`render.yaml`](./render.yaml).
+This deploys both API and dashboard to Render so they are accessible from anywhere.
 
-1. Push this repo to GitHub/GitLab/Bitbucket.
-2. In Render, create a Blueprint from the repo.
-3. Set env vars in Render:
+### 1. Push latest code to GitHub
+In GitHub Desktop:
+1. Commit all changes.
+2. Push to `origin/main`.
+
+### 2. Start Blueprint deploy
+Click the button at the top of this README, or use:
+- [Render Blueprint Link](https://dashboard.render.com/blueprint/new?repo=https://github.com/Pipin-Man/Week-2---EventsDashboard)
+
+### 3. Render creates 2 services
+From [`render.yaml`](./render.yaml):
+- `event-dashboard-api` (Node web service)
+- `event-dashboard-web` (static dashboard)
+
+### 4. Fill environment variables in Render
+
+#### For `event-dashboard-api`
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PROJECT_CREATION_TOKEN`
-4. Deploy.
 
-After deployment, send events to:
-- `POST https://<your-render-service>/api/events`
+#### For `event-dashboard-web`
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- `VITE_API_BASE_URL` -> set to your API URL (for example: `https://event-dashboard-api.onrender.com`)
 
-## API contract
+### 5. Deploy and verify
+1. Wait for API deploy.
+2. Open API health endpoint:
+   - `https://<your-api-service>.onrender.com/api/health`
+   - Expect: `{"ok":true}`
+3. Open dashboard:
+   - `https://<your-web-service>.onrender.com`
+4. In dashboard, create/select a project.
+
+### 6. Test from another device
+- Open the dashboard URL from your phone/tablet/laptop.
+- Send an event to the API URL from any machine/tool using a valid API key.
+- Confirm event appears in Feed.
+
+### 7. Important note about always-on
+Render Free plan can sleep after inactivity. For a more always-on API, use at least **Starter** plan for the API service.
+
+## API Reference (Short)
+
+### `GET /api/health`
+Returns API health.
 
 ### `POST /api/projects`
-Creates an ingestion project and returns an API key.
+Creates project + API key.
 
-Request:
+Body:
 
 ```json
 {
   "name": "My Project",
-  "creationToken": "your-random-secret-token"
+  "creationToken": "your-secret"
 }
 ```
 
-Response:
+### `POST /api/projects/:projectId/rotate-key`
+Rotates API key for a project (requires `creationToken`).
 
-```json
-{
-  "project": {
-    "id": "uuid",
-    "name": "My Project",
-    "created_at": "2026-03-07T..."
-  },
-  "apiKey": "edk_..."
-}
-```
+### `POST /api/projects/:projectId/revoke-key`
+Revokes current API key for a project (requires `creationToken`).
 
 ### `POST /api/events`
 Requires `x-api-key` header.
 
-Request:
+Body:
 
 ```json
 {
   "channel": "orders",
   "title": "Order #1532 paid",
   "description": "Optional",
-  "emoji": "?",
+  "emoji": ":package:",
   "tags": ["vip", "stripe"]
 }
 ```
 
-### `GET /api/health`
-Health check endpoint.
+### `POST /api/insight`
+Upserts insight by title for the authenticated project.
+
+### `GET /api/insights?projectId=<uuid>&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD`
+Gets insights for project and optional date range.
 
 ## Troubleshooting
 
-### PowerShell blocks npm (`running scripts is disabled`)
-Use one of:
+### PowerShell blocks npm scripts
+Use:
 
 ```powershell
 npm.cmd run dev:api
+npm.cmd run dev:dashboard
 ```
 
-or
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-```
-
-### `'tsx' is not recognized`
-Install dependencies from repo root:
+### `tsx` is not recognized
+Run install from repo root:
 
 ```powershell
 npm.cmd install
 ```
 
-### Dashboard is blank
-Most likely env issue. Check:
-- `dashboard/.env` exists
-- `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set correctly
-- You restarted Vite after editing `.env`
-- Browser console for `Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY`
+### Dashboard blank or cannot load data
+- Check `dashboard/.env` values.
+- Restart Vite after editing `.env`.
+- Verify API URL and Supabase keys.
 
-### Feed is empty
-UI can load with zero events. Send at least one event via `POST /api/events`.
+### `Invalid creation token`
+Token in request must exactly match `PROJECT_CREATION_TOKEN`.
 
-### `POST /api/projects` returns `Invalid creation token`
-The token in your request must exactly match `PROJECT_CREATION_TOKEN` in `api/.env`.
+### API health works but other routes fail
+- Ensure you call a real endpoint (`/api/projects`, `/api/events`, etc.).
+- `{"error":"Not found."}` means wrong path.
+
+## Security Notes
+- Never expose `SUPABASE_SERVICE_ROLE_KEY` in frontend.
+- Keep `PROJECT_CREATION_TOKEN` private.
+- Rotate keys if you suspect leak.
+
+## License
+Personal/learning project. Add your preferred license if needed.
+
+
+
+
+
